@@ -1,4 +1,4 @@
-const db = require("../db/db");
+const db = require("../DataBase/db");
 
 // 회원가입 처리
 exports.signup = (req, res) => {
@@ -7,12 +7,12 @@ exports.signup = (req, res) => {
     "INSERT INTO usertable (userId, userPw, userName) VALUES (?, ?, ?)";
   db.query(sql, [userId, userPw, userName], (err, result) => {
     if (err) {
-      console.error("Error inserting user:", err);
-      res.status(500).json({ message: "Error inserting user" });
+      console.error("회원가입 오류:", err);
+      res.status(500).json({ success: false, message: "회원가입 실패" });
       return;
     }
-    console.log("User inserted successfully");
-    res.status(201).json({ message: "User created successfully" });
+    console.log("회원가입 성공");
+    res.status(201).json({ success: true, message: "회원가입 성공" });
   });
 };
 
@@ -20,19 +20,22 @@ exports.signup = (req, res) => {
 exports.login = (req, res) => {
   const { userId, userPw } = req.body;
   const sql = "SELECT * FROM usertable WHERE userId = ? AND userPw = ?";
-  db.query(sql, [userId, userPw], (err, result) => {
+  db.query(sql, [userId, userPw], (err, results) => {
     if (err) {
-      console.error("Error querying user:", err);
-      res.status(500).json({ message: "Error querying user" });
+      console.error("로그인 오류:", err);
+      res.status(500).json({ success: false, message: "로그인 실패" });
       return;
     }
 
-    if (result.length > 0) {
+    if (results.length > 0) {
       // 로그인 성공
-      res.status(200).json({ success: true });
+      res.status(200).json({ success: true, message: "로그인 성공" });
     } else {
       // 로그인 실패
-      res.status(200).json({ success: false });
+      res.status(401).json({
+        success: false,
+        message: "아이디 또는 비밀번호가 올바르지 않습니다.",
+      });
     }
   });
 };
